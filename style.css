@@ -151,3 +151,39 @@ body{background:radial-gradient(circle at 8% 7%,#d9f0f3 0 12%,transparent 28%),r
  .login label{margin:8px 0}
  .login input,.login select{min-height:48px}
 }
+
+/* ===== 員工管理 App V3：iPhone 實機修正 ===== */
+label{min-width:0}
+input[type="date"],input[type="month"]{
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  inline-size:100%;
+  box-sizing:border-box;
+}
+.tab-icon{width:22px;height:22px;display:grid;place-items:center}
+.tab-icon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+
+@media(max-width:720px){
+  /* App 內容永遠避開瀏海／動態島與狀態列 */
+  body{padding-top:0}
+  .shell{padding-top:calc(env(safe-area-inset-top) + 14px)}
+  #appView{padding-top:0}
+  .top{min-height:82px;padding:8px 3px 10px;align-items:flex-start}
+  .logout-btn{margin-top:2px}
+
+  /* iOS date/month 具有自己的 intrinsic width，強制限制在卡片內 */
+  .card,.card label,.grid2,.grid3,.admin-grid{min-width:0;max-width:100%}
+  input,select,textarea{max-width:100%;min-width:0}
+  input[type="date"],input[type="month"]{-webkit-min-logical-width:0}
+
+  /* 公告在手機直接完整換行，不再只看到半句 */
+  .staff-marquee{align-items:flex-start;overflow:visible;padding:10px 12px;gap:9px}
+  .staff-marquee-window{overflow:visible;white-space:normal;min-width:0}
+  .staff-marquee-text{display:block;min-width:0;padding-left:0;white-space:normal;word-break:break-word;line-height:1.45;animation:none}
+
+  /* 底部圖示統一為線條 icon */
+  .tabs button{font-size:10px;gap:2px}
+  .tab-icon{font-size:0}
+}

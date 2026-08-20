@@ -83,6 +83,8 @@ function page(n) {
   document.querySelectorAll(".tabs button").forEach(x=>
     x.classList.toggle("active",x.dataset.page===n)
   );
+  // iPhone PWA 切換分頁時回到頂部，避免標題滑進狀態列／動態島下方
+  requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:"auto"}));
 }
 
 async function boot() {
