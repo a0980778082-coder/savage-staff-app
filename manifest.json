@@ -1,12 +1,16 @@
 {
-  "name": "小野人員工管理",
-  "short_name": "小野人員工",
-  "description": "小野人餐盒製造所員工排班、排假、代班、里程與薪資管理",
-  "start_url": "/savage-staff-system/?source=app",
-  "scope": "/savage-staff-system/",
+  "name": "員工管理系統",
+  "short_name": "員工管理",
+  "description": "排班、考勤、代班、里程與薪資管理",
+  "start_url": "/savage-staff-app/?source=app",
+  "scope": "/savage-staff-app/",
   "display": "standalone",
-  "background_color": "#f3f7f8",
-  "theme_color": "#89c8d3",
+  "background_color": "#f4f9fa",
+  "theme_color": "#159aaa",
   "lang": "zh-TW",
-  "orientation": "portrait-primary"
+  "orientation": "portrait-primary",
+  "icons": [
+    {"src":"icons/icon-192.png","sizes":"192x192","type":"image/png"},
+    {"src":"icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
 }

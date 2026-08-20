@@ -13,7 +13,7 @@
       appId: "85f48a6b-7c6b-4013-a74d-aa59d3f94a4f",
       serviceWorkerPath: "OneSignalSDKWorker.js",
       serviceWorkerParam: {
-        scope: "/savage-staff-system/"
+        scope: "/savage-staff-app/"
       },
       notifyButton: {
         enable: true
@@ -27,14 +27,26 @@
 <meta name="theme-color" content="#89c8d3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="小野人員工">
+<meta name="apple-mobile-web-app-title" content="員工管理">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>小野人員工系統</title><link rel="stylesheet" href="style.css?v=20260818-app-v1">
+<title>員工管理系統</title><link rel="stylesheet" href="style.css?v=20260819-app-v2">
 </head>
 <body>
 <main class="shell">
 <section id="loginView" class="card login">
-<div class="app-mark">野</div><div class="brand">小野人餐盒製造所</div><h1>員工管理</h1><p class="login-subtitle">排班・排假・代班・里程・薪資</p>
+<div class="login-logo" aria-label="員工管理系統 Logo">
+  <svg viewBox="0 0 120 96" role="img" aria-hidden="true">
+    <rect x="19" y="15" width="65" height="56" rx="13" fill="none" stroke="currentColor" stroke-width="8"/>
+    <path d="M34 11v16M69 11v16" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>
+    <path d="m35 43 7 7 13-15" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="69" cy="57" r="13" fill="currentColor"/>
+    <path d="M48 89c2-17 10-25 21-25s19 8 21 25" fill="currentColor"/>
+    <circle cx="96" cy="65" r="9" fill="currentColor" opacity=".72"/>
+    <path d="M86 89c1-11 5-17 11-17 7 0 11 6 12 17" fill="currentColor" opacity=".72"/>
+  </svg>
+</div>
+<h1>員工管理系統</h1><div class="login-english">EMPLOYEE MANAGEMENT SYSTEM</div><p class="login-subtitle">排班・考勤・代班・里程・薪資</p>
 <label>姓名<select id="loginName"></select></label>
 <label>密碼<input id="loginPin" type="password" inputmode="numeric"></label>
 <button id="loginBtn" class="primary">登入</button><p id="loginMsg" class="danger"></p>
@@ -179,5 +191,5 @@
     <p id="statusMessage">正在確認帳號資料，請稍候…</p>
   </div>
 </div>
-<script src="config.js"></script><script src="app.js?v=20260818-app-v1"></script>
+<script src="config.js"></script><script src="app.js?v=20260819-app-v2"></script>
 </body></html>
