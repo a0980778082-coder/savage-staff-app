@@ -63,6 +63,113 @@ async function linkOneSignalUser(user) {
   }
 }
 
+
+function isStandaloneApp(){
+  return window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone===true;
+}
+function isIOS(){return /iPad|iPhone|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1)}
+function setPushStatus(kind,title,text,icon){
+  const card=$("pushStatusCard");
+  if(!card)return;
+  card.className=`push-status-card ${kind||""}`.trim();
+  $("pushStatusIcon").textContent=icon||"•";
+  $("pushStatusTitle").textContent=title||"";
+  $("pushStatusText").textContent=text||"";
+  const dot=$("notificationDot");
+  if(dot){dot.className="notification-dot "+(kind==="ok"?"on":kind==="error"?"off":"")}
+}
+async function getPushState(){
+  const base={supported:("serviceWorker" in navigator)&&("Notification" in window),standalone:isStandaloneApp(),ios:isIOS(),permission:"default",optedIn:false,subscriptionId:""};
+  if(!base.supported)return base;
+  base.permission=Notification.permission;
+  try{
+    await new Promise(resolve=>{
+      window.OneSignalDeferred=window.OneSignalDeferred||[];
+      window.OneSignalDeferred.push(async function(OneSignal){
+        try{
+          base.permission=OneSignal.Notifications?.permission ? "granted" : (Notification.permission||"default");
+          base.optedIn=!!OneSignal.User?.PushSubscription?.optedIn;
+          base.subscriptionId=OneSignal.User?.PushSubscription?.id||"";
+        }catch(e){console.warn("讀取 OneSignal 訂閱狀態失敗",e)}
+        resolve();
+      });
+      setTimeout(resolve,3500);
+    });
+  }catch(e){}
+  return base;
+}
+async function refreshPushUI(){
+  if(!$("pushStatusCard"))return;
+  setPushStatus("","正在檢查通知狀態","請稍候…","…");
+  const st=await getPushState();
+  const hint=$("pushInstallHint"),enable=$("enablePushBtn"),test=$("testPushBtn");
+  if(hint)hint.hidden=!(st.ios&&!st.standalone);
+  if(!st.supported){
+    setPushStatus("error","此裝置不支援推播","請使用最新版 Safari／iOS，並從主畫面的 App 開啟。","!");
+    if(enable)enable.disabled=true;if(test)test.disabled=true;return;
+  }
+  if(st.ios&&!st.standalone){
+    setPushStatus("warn","請從 iPhone 主畫面開啟","Safari 分頁內不能啟用 iPhone PWA 背景推播。","↗");
+    if(enable)enable.disabled=true;if(test)test.disabled=true;return;
+  }
+  if(st.permission==="denied"){
+    setPushStatus("error","通知權限已被關閉","請到 iPhone「設定 → 通知 → 員工管理」重新允許通知。","!");
+    if(enable)enable.disabled=true;if(test)test.disabled=true;return;
+  }
+  if(st.permission==="granted"&&st.optedIn){
+    setPushStatus("ok","背景推播已開啟","App 關閉或切到背景時，伺服器推播仍可送到通知中心。","✓");
+    if(enable){enable.disabled=false;enable.textContent="通知已開啟"}if(test)test.disabled=false;return;
+  }
+  if(st.permission==="granted"&&!st.optedIn){
+    setPushStatus("warn","通知權限已允許，但尚未訂閱","按下方按鈕完成推播訂閱。","!");
+    if(enable){enable.disabled=false;enable.textContent="完成推播訂閱"}if(test)test.disabled=true;return;
+  }
+  setPushStatus("warn","手機通知尚未開啟","請按「開啟手機通知」，並在 iPhone 跳出的視窗選擇允許。","🔕");
+  if(enable){enable.disabled=false;enable.textContent="開啟手機通知"}if(test)test.disabled=true;
+}
+async function enablePush(){
+  const btn=$("enablePushBtn");if(btn)btn.disabled=true;
+  try{
+    if(isIOS()&&!isStandaloneApp())throw Error("請先把員工管理加入 iPhone 主畫面，再從桌面 App 開啟。 ");
+    await new Promise((resolve,reject)=>{
+      window.OneSignalDeferred=window.OneSignalDeferred||[];
+      window.OneSignalDeferred.push(async function(OneSignal){
+        try{
+          await OneSignal.Notifications.requestPermission();
+          if(Notification.permission!=="granted")throw Error("你尚未允許通知權限");
+          if(OneSignal.User?.PushSubscription?.optIn)await OneSignal.User.PushSubscription.optIn();
+          if(me)await linkOneSignalUser(me);
+          resolve();
+        }catch(e){reject(e)}
+      });
+    });
+    toast("手機推播已開啟");
+  }catch(e){toast(e.message||"通知開啟失敗")}
+  finally{if(btn)btn.disabled=false;await refreshPushUI()}
+}
+async function testLocalNotification(){
+  try{
+    if(Notification.permission!=="granted")throw Error("請先開啟手機通知");
+    const reg=await navigator.serviceWorker.ready;
+    await reg.showNotification("員工管理系統｜測試通知",{
+      body:"通知顯示正常。之後班表公布或公告推播可在 App 不開啟時送達。",
+      icon:"icons/icon-192.png",badge:"icons/icon-192.png",tag:"staff-v4-test",renotify:true,
+      data:{url:"/savage-staff-app/?source=push"}
+    });
+    toast("測試通知已送出");
+  }catch(e){toast(e.message||"測試通知失敗")}
+}
+async function openPushModal(){if($("pushModal"))$("pushModal").hidden=false;await refreshPushUI()}
+function closePushModal(){if($("pushModal"))$("pushModal").hidden=true}
+function initPushListeners(){
+  window.OneSignalDeferred=window.OneSignalDeferred||[];
+  window.OneSignalDeferred.push(async function(OneSignal){
+    try{
+      OneSignal.Notifications?.addEventListener?.("permissionChange",refreshPushUI);
+      OneSignal.User?.PushSubscription?.addEventListener?.("change",refreshPushUI);
+    }catch(e){console.warn("推播狀態監聽初始化失敗",e)}
+  });
+}
 async function unlinkOneSignalUser() {
   try {
     window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -175,7 +282,7 @@ async function logout(){
   $("loginView").hidden=false;
   if($("loginPin"))$("loginPin").value="";
 }
-function showApp(){$("loginView").hidden=true;$("appView").hidden=false;$("hello").textContent=`${me.name}，你好`;$("todayText").textContent=new Date().toLocaleDateString("zh-TW",{dateStyle:"full"});$("adminTab").hidden=me.role!=="admin"}
+function showApp(){$("loginView").hidden=true;$("appView").hidden=false;$("hello").textContent=`${me.name}，你好`;$("todayText").textContent=new Date().toLocaleDateString("zh-TW",{dateStyle:"full"});$("adminTab").hidden=me.role!=="admin";refreshPushUI().catch(()=>{})}
 async function refresh(month){const r=await api("refresh",{month:month||ym()});me=r.user;data=r;showApp();renderAll()}
 function renderAll(){renderStaffNotice();renderToday();renderMonth();renderOff();renderSubstitute();renderOil();renderSalary(data.salary)}
 
@@ -531,6 +638,7 @@ $("tabs").onclick=e=>{const b=e.target.closest("[data-page]");if(b)page(b.datase
 $("loginBtn").onclick=login;$("logoutBtn").onclick=logout;$("offSubmit").onclick=submitOff;$("subSubmit").onclick=submitSubstitute;$("oilSubmit").onclick=submitOil;$("salaryLoad").onclick=loadSalary;
 $("adminLoad").onclick=loadAdmin;$("saveShift").onclick=saveShift;$("saveEmployee").onclick=saveEmployee;$("saveSettings").onclick=saveSettings;$("saveStaffNotice").onclick=()=>saveStaffNotice(false);$("saveAndPushStaffNotice").onclick=()=>saveStaffNotice(true);$("publishSchedule").onclick=publishSchedule;$("exportPayroll").onclick=exportPayroll;
 $("finishShiftDay").onclick=finishShiftDay;$("closeStaffNotice").onclick=closeStaffNotice;$("offDate").onchange=validateOffDate;
+if($("notificationBtn"))$("notificationBtn").onclick=openPushModal;if($("closePushModal"))$("closePushModal").onclick=closePushModal;if($("enablePushBtn"))$("enablePushBtn").onclick=enablePush;if($("testPushBtn"))$("testPushBtn").onclick=testLocalNotification;initPushListeners();
 $("adminMonth").onchange=()=>{const month=$("adminMonth").value,p=getScheduleProgress([],month);if(p.next)$("shiftDate").value=p.next;loadAdmin()};
 $("shiftDate").onchange=checkConflict;$("shiftEmployee").onchange=checkConflict;$("shiftType").onchange=()=>{autoFillShiftHours(true);checkConflict()};$("shiftCustom").oninput=()=>{if($("shiftType").value==="自訂")autoFillShiftHours(true)};$("oilPhoto").onchange=e=>{$("oilPreview").innerHTML=e.target.files[0]?`<img class="photo" src="${URL.createObjectURL(e.target.files[0])}">`:""};
 boot().catch(e=>toast(e.message));

@@ -30,7 +30,7 @@
 <meta name="apple-mobile-web-app-title" content="員工管理">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>員工管理系統</title><link rel="stylesheet" href="style.css?v=20260820-app-v3">
+<title>員工管理系統</title><link rel="stylesheet" href="style.css?v=20260821-app-v4">
 </head>
 <body>
 <main class="shell">
@@ -53,7 +53,7 @@
 </section>
 
 <section id="appView" hidden>
-<header class="top"><div><span class="app-eyebrow">SAVAGE STAFF</span><b id="hello"></b><small id="todayText"></small></div><button id="logoutBtn" class="logout-btn">登出</button></header>
+<header class="top"><div><span class="app-eyebrow">EMPLOYEE SYSTEM</span><b id="hello"></b><small id="todayText"></small></div><div class="top-actions"><button id="notificationBtn" class="notification-btn" type="button" aria-label="通知設定"><span aria-hidden="true">🔔</span><span class="notification-btn-text">通知</span><i id="notificationDot" class="notification-dot"></i></button><button id="logoutBtn" class="logout-btn">登出</button></div></header>
 <div id="staffMarquee" class="staff-marquee" hidden>
   <div class="staff-marquee-label">📢 員工公告</div>
   <div class="staff-marquee-window"><div id="staffMarqueeText" class="staff-marquee-text"></div></div>
@@ -183,6 +183,25 @@
     <button id="closeStaffNotice" class="primary">我知道了</button>
   </div>
 </div>
+
+<div id="pushModal" class="push-modal" hidden>
+  <div class="push-modal-box">
+    <button id="closePushModal" class="push-close" type="button" aria-label="關閉">×</button>
+    <div class="push-icon">🔔</div>
+    <h2>手機推播通知</h2>
+    <p class="muted push-intro">開啟後，即使員工管理 App 沒有停留在畫面上，班表公布、員工公告等伺服器推播仍可送到 iPhone 通知中心。</p>
+    <div id="pushStatusCard" class="push-status-card">
+      <span id="pushStatusIcon" class="push-status-icon">…</span>
+      <div><b id="pushStatusTitle">正在檢查通知狀態</b><small id="pushStatusText">請稍候</small></div>
+    </div>
+    <div id="pushInstallHint" class="push-hint" hidden>iPhone 必須先用 Safari「加入主畫面」，再從桌面的「員工管理」開啟，才能啟用背景 Web Push。</div>
+    <button id="enablePushBtn" class="primary" type="button">開啟手機通知</button>
+    <button id="testPushBtn" type="button">測試通知顯示</button>
+    <div class="push-sound-note"><b>通知沒聲音？</b><br>Web App 無法強制控制 iPhone 音量。請確認手機沒有靜音／專注模式，並到「設定 → 通知 → 員工管理」確認允許通知與聲音。</div>
+    <small class="muted push-footnote">V4 使用真正的 Web Push 訂閱；不是讓網頁一直在背景執行。通知由推播伺服器送達後，由 iPhone 系統顯示。</small>
+  </div>
+</div>
+
 <div id="statusModal" class="status-modal" hidden>
   <div class="status-box">
     <div id="statusSpinner" class="spinner"></div>
@@ -191,5 +210,5 @@
     <p id="statusMessage">正在確認帳號資料，請稍候…</p>
   </div>
 </div>
-<script src="config.js"></script><script src="app.js?v=20260820-app-v3"></script>
+<script src="config.js"></script><script src="app.js?v=20260821-app-v4"></script>
 </body></html>
